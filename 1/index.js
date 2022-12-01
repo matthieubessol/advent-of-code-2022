@@ -16,14 +16,9 @@ dataSplitted.forEach((calorie) => {
   }
 });
 
-const dataByElf = caloriesByElf.map((el, index) => ({
-  index,
-  items: el,
-  total: el.reduce((a, b) => a + b),
-}));
+const dataByElf = caloriesByElf.map((el) => el.reduce((a, b) => a + b));
 
-const getMaxCalories = (d) =>
-  d.map(({ total }) => total).sort((a, b) => b - a)?.[0];
+const getMaxCalories = (d) => d.sort((a, b) => b - a)?.[0];
 
 const maxCalories = getMaxCalories(dataByElf);
 
@@ -32,7 +27,6 @@ console.log(maxCalories);
 // 2
 const getTopThreeMaxCalories = (d) =>
   d
-    .map(({ total }) => total)
     .sort((a, b) => b - a)
     ?.slice(0, 3)
     .reduce((a, b) => a + b);
