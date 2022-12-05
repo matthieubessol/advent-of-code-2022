@@ -20,8 +20,6 @@ rows.forEach((row) => {
             cranes[index] = [];
           }
 
-          if (index === 9) console.log({ index, crane: crane[1] });
-
           cranes[index].push(crane[1]);
         }
       });
