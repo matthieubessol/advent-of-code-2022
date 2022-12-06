@@ -1,11 +1,9 @@
 const fs = require("fs");
 
-const data = fs
+const code = fs
   .readFileSync("./data.txt", "utf-8")
   .split("\n")
-  .filter((a) => a);
-
-const code = data[0];
+  .filter((a) => a)[0];
 
 const areAllCharactersDifferent = (string) => {
   const counts = {};
