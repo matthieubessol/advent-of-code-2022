@@ -13,7 +13,6 @@ let tree = [
     type: "dir",
     files: [],
     directories: [],
-    parent: null,
     size: 0,
   },
 ];
@@ -46,7 +45,6 @@ rows.forEach((row) => {
         type: "dir",
         files: [],
         directories: [],
-        parent: currentPathName,
         size: 0,
       });
     }
@@ -56,25 +54,10 @@ rows.forEach((row) => {
         name: rowInfo[1],
         type: "file",
         size: fileSize,
-        parent: currentPathName,
       });
     }
   }
 });
-
-// const getFolderSize = (currentNode, size) => {
-//   if (currentNode.totalSize) return size;
-//   if (Array.isArray(currentNode)) {
-//     size += currentNode.map((a) => getFolderSize(a, size));
-//   } else {
-//     console.log(currentNode.files.map((f) => f.size));
-//     const currentFileSize = currentNode.files.map((f) => f.size).reduce((a, b) => a + b);
-//     size += currentFileSize
-//     currentNode.totalSize = getFolderSize(currentNode, 0);
-//   }
-
-//   return size;
-// };
 
 const maxSize = 100000;
 let nodesToDelete = [];
