@@ -5,8 +5,6 @@ const rows = fs
   .split("\n")
   .filter((a) => a);
 
-const isCommand = (row) => row.includes("$");
-
 let tree = [
   {
     name: "/",
@@ -93,9 +91,10 @@ const totalDeleted = nodesToDelete
 console.log({ totalDeleted });
 
 // 2
-
-const freeSpace = 70000000 - 43956976;
-const needed = 30000000 - freeSpace;
+const totalSpace = 70000000
+const spaceNeeded = 30000000
+const freeSpace = totalSpace - tree[0].totalSize;
+const needed = spaceNeeded - freeSpace;
 
 let nodeToFreeSpace = [];
 const getFolderToFreeSpace = (node) => {
