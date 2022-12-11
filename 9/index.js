@@ -20,7 +20,7 @@ const getTailPositions = (ropeLength) => {
 
   positionsVisited.push(tailCurrentPosition);
 
-  // let tails = new Array(ropeLength).fill({ x: 0, y: 0 });
+  let tails = new Array(ropeLength).fill({ x: 0, y: 0 });
 
   instructions.forEach((instruction) => {
     const direction = instruction[0];
@@ -45,45 +45,43 @@ const getTailPositions = (ropeLength) => {
       }
 
       for (let j = 0; j < ropeLength; j++) {
-        // let [tempX, tempY] = tails[j];
-        // let beforeX = 0;
-        // let beforeY = 0;
+        let tailCurrentPosition = { ...tails[j] };
+        let beforePosition = { x: 0, y: 0 };
 
-        // if (i > 0) {
-        //   beforeX = tails[j - 1].x;
-        //   beforeY = tails[j - 1].y;
-        // } else {
-        //   beforeX = headCurrentPosition.x;
-        //   beforeY = headCurrentPosition.y;
-        // }
-
-        if (headCurrentPosition.x - tailCurrentPosition.x > 1) {
-          tailCurrentPosition.x += 1;
-          tailCurrentPosition.y = headCurrentPosition.y;
+        if (j > 0) {
+          beforePosition = {
+            ...tails[j - 1],
+          };
+        } else {
+          beforePosition = {
+            ...headCurrentPosition,
+          };
         }
 
-        if (headCurrentPosition.x - tailCurrentPosition.x < -1) {
-          tailCurrentPosition.x -= 1;
-          tailCurrentPosition.y = headCurrentPosition.y;
+        let diffX = Math.abs(beforePosition.x - tailCurrentPosition.x);
+        let diffY = Math.abs(beforePosition.y - tailCurrentPosition.y);
+
+        if (diffX > 1 && !diffY) {
+          tailCurrentPosition.x +=
+            beforePosition.x - tailCurrentPosition.x > 0 ? 1 : -1;
+        } else if (diffY > 1 && !diffX) {
+          tailCurrentPosition.y +=
+            beforePosition.y - tailCurrentPosition.y > 0 ? 1 : -1;
+        } else if (diffX > 1 || diffY > 1) {
+          tailCurrentPosition.x +=
+            beforePosition.x - tailCurrentPosition.x > 0 ? 1 : -1;
+          tailCurrentPosition.y +=
+            beforePosition.y - tailCurrentPosition.y > 0 ? 1 : -1;
         }
 
-        if (headCurrentPosition.y - tailCurrentPosition.y > 1) {
-          tailCurrentPosition.y += 1;
-          tailCurrentPosition.x = headCurrentPosition.x;
+        if (Math.abs(diffX) > 1 || Math.abs(diffY) > 1) {
+          tails[j] = {
+            ...tailCurrentPosition,
+          };
         }
-
-        if (headCurrentPosition.y - tailCurrentPosition.y < -1) {
-          tailCurrentPosition.y -= 1;
-          tailCurrentPosition.x = headCurrentPosition.x;
-        }
-
-        // tails[i] = tailCurrentPosition;
 
         if (j === ropeLength - 1) {
-          // positionsVisited.push(tails[j]);
-          positionsVisited.push({
-            ...tailCurrentPosition,
-          });
+          positionsVisited.push(tails[j - 1]);
         }
       }
     }
