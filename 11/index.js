@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-const monkeys = fs
+let monkeys = fs
   .readFileSync("./data.txt", "utf-8")
   .trimEnd()
   .split("Monkey")
@@ -37,53 +37,81 @@ const monkeys = fs
     };
   });
 
-const nbRound = 20;
+let monkeysCopy = JSON.parse(JSON.stringify(monkeys));
 
+const modulo = monkeys.reduce((a, b) => a * b.test.value, 1);
+
+const checkItem = (monkey, item, divide = false) => {
+  // Get new value
+  let newItemValue = 0;
+  let first =
+    typeof monkey.mathOperation.first === "number"
+      ? monkey.mathOperation.first
+      : item;
+  let second =
+    typeof monkey.mathOperation.second === "number"
+      ? monkey.mathOperation.second
+      : item;
+  switch (monkey.mathOperation.operation) {
+    case "+":
+      newItemValue = first + second;
+      break;
+    case "*":
+      newItemValue = first * second;
+    default:
+      break;
+  }
+  if (divide) newItemValue = parseInt(newItemValue / 3, 10);
+
+  // Check test
+  let success = false;
+  if (monkey.test.operation === "divisible") {
+    success = newItemValue % monkey.test.value === 0;
+  }
+
+  if (!divide) {
+    newItemValue = newItemValue % modulo;
+  }
+
+  monkeys[success ? monkey.successMonkey : monkey.failMonkey].items.push(
+    newItemValue
+  );
+  monkey.numberOfInspections += 1;
+};
+
+let nbRound = 20;
 for (let i = 0; i < nbRound; i++) {
   monkeys.forEach((monkey) => {
-    monkey.items.forEach((item, index) => {
-      // Get new value
-      let newItemValue = 0;
-      let first =
-        typeof monkey.mathOperation.first === "number"
-          ? monkey.mathOperation.first
-          : item;
-      let second =
-        typeof monkey.mathOperation.second === "number"
-          ? monkey.mathOperation.second
-          : item;
-      switch (monkey.mathOperation.operation) {
-        case "+":
-          newItemValue = first + second;
-          break;
-        case "*":
-          newItemValue = first * second;
-        default:
-          break;
-      }
-      newItemValue = parseInt(newItemValue / 3, 10);
-
-      // Check test
-      let success = false;
-      if (monkey.test.operation === "divisible") {
-        success = newItemValue % monkey.test.value === 0;
-      }
-
-      monkeys[success ? monkey.successMonkey : monkey.failMonkey].items.push(
-        newItemValue
-      );
-      monkey.numberOfInspections += 1;
+    monkey.items.forEach((item) => {
+      checkItem(monkey, item);
     });
     monkey.items = [];
   });
 }
 
-console.log(monkeys);
-
-const monkeyBusinessScore = monkeys
+const monkeyBusinessScoreFirst = monkeys
   .map((a) => a.numberOfInspections)
   .sort((a, b) => b - a)
   .slice(0, 2)
   .reduce((a, b) => a * b);
 
-console.log(monkeyBusinessScore);
+console.log(monkeyBusinessScoreFirst);
+
+nbRound = 10000;
+monkeys = monkeysCopy;
+for (let i = 0; i < nbRound; i++) {
+  monkeys.forEach((monkey) => {
+    monkey.items.forEach((item) => {
+      checkItem(monkey, item, false);
+    });
+    monkey.items = [];
+  });
+}
+
+const monkeyBusinessScoreSecond = monkeys
+  .map((a) => a.numberOfInspections)
+  .sort((a, b) => b - a)
+  .slice(0, 2)
+  .reduce((a, b) => a * b);
+
+console.log(monkeyBusinessScoreSecond);
