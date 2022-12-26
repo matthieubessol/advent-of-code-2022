@@ -6,89 +6,105 @@ const levels = fs
   .split("\n")
   .map((row) => row.split(""));
 
-const chars = "abcdefghijklmnopqrstuvwxyz";
+const abc = "abcdefghijklmnopqrstuvwxyz";
 
-let isAtTop = false;
-let visitedPlaces = [];
+/**
+ *
+ * @param {{x: number, y: number, step: number}} start
+ * @param {{x: number, y: number, step: number}} end
+ * @param {boolean} checkFirstLetter
+ */
+const bfs = (start, end, checkFirstLetter = false) => {
+  let visitedItems = new Set();
+  let queue = [];
+  visitedItems.add(start);
+  queue.push(start);
+  while (queue.length) {
+    const firstItem = queue.shift();
 
-const getBestNextSteps = (x, y, visitedItems = []) => {
-  let currentElevation = levels[y][x];
-  if (currentElevation === "S") currentElevation = "a";
-  if (currentElevation === "E") return visitedItems;
-  let nextElevation = chars[chars.indexOf(currentElevation) + 1];
-  if (currentElevation === "z") {
-    nextElevation = "E";
-  }
+    if (firstItem.x === end.x && firstItem.y === end.y) {
+      return firstItem.step;
+    }
 
-  const possibilities = [
-    { x: x, y: y - 1 },
-    { x: x - 1, y: y },
-    { x: x + 1, y: y },
-    { x: x, y: y + 1 },
-  ]
-    .filter(
-      (position) =>
-        position.x >= 0 &&
-        position.y >= 0 &&
-        position.x < levels[0].length &&
-        position.y < levels.length
-    )
-    .filter((position) => {
-      const alreadyVisited = visitedItems.filter(
-        (oldPosition) =>
-          oldPosition.x === position.x && oldPosition.y === position.y
+    const firstValue = levels[firstItem.y][firstItem.x];
+    let firstIndex = abc.indexOf(firstValue);
+    if (firstValue === "S") {
+      firstIndex = abc.indexOf("a");
+    } else if (firstValue === "E") {
+      firstIndex = abc.indexOf("z");
+    }
+
+    const neighbors = [
+      { x: firstItem.x, y: firstItem.y - 1, step: firstItem.step + 1 },
+      { x: firstItem.x - 1, y: firstItem.y, step: firstItem.step + 1 },
+      { x: firstItem.x + 1, y: firstItem.y, step: firstItem.step + 1 },
+      { x: firstItem.x, y: firstItem.y + 1, step: firstItem.step + 1 },
+    ].filter((position) => {
+      const isValid = levels?.[position?.y]?.[position?.x];
+
+      if (!isValid) {
+        return false;
+      }
+
+      const contains = [...visitedItems].find(
+        (item) => item.x === position.x && item.y === position.y
       );
 
-      if (alreadyVisited?.length) {
+      return !contains;
+    });
+
+    neighbors.forEach((position) => {
+      const neighborValue = levels[position.y][position.x];
+
+      if (neighborValue === "a" && checkFirstLetter) {
         return false;
       }
 
-      let possibleElevations = [currentElevation, nextElevation];
-      if (nextElevation === "z") {
-        possibleElevations = [...possibleElevations, "E"];
+      let neighborIndex = abc.indexOf(neighborValue);
+
+      if (neighborValue === "S") {
+        neighborIndex = 0;
+      } else if (neighborValue === "E") {
+        neighborIndex = 25;
       }
 
-      return possibleElevations.includes(levels[position.y][position.x]);
-    })
-    .map((position) => {
-      const nextSteps = getBestNextSteps(position.x, position.y, [
-        ...visitedItems,
-        position,
-      ]);
-
-      return nextSteps;
-    })
-    .filter((nextSteps) => {
-      if (!nextSteps) {
-        return false;
+      if (neighborIndex <= firstIndex + 1) {
+        visitedItems.add(position);
+        queue.push(position);
       }
-
-      const lastPosition = nextSteps?.[nextSteps?.length - 1];
-      return lastPosition && levels[lastPosition.y][lastPosition.x] === "E";
-    })
-    .sort((a, b) => a?.length - b?.length);
-
-  if (!possibilities) {
-    return null;
+    });
   }
-
-  return possibilities?.[0];
 };
 
 let currentPosition;
+let endPosition;
 levels.forEach((level, y) =>
   level.forEach((char, x) => {
     if (char === "S") {
-      currentPosition = { x, y };
+      currentPosition = { x, y, step: 0 };
+    }
+
+    if (char === "E") {
+      endPosition = { x, y, step: 0 };
     }
   })
 );
 
-visitedPlaces.push(currentPosition);
+console.log(bfs(currentPosition, endPosition));
 
-// const currentPosition = visitedPlaces[visitedPlaces.length - 1];
-console.log({ currentPosition });
-console.time("time");
-const possibilities = getBestNextSteps(currentPosition.x, currentPosition.y);
-console.timeEnd("time");
-console.log(possibilities?.length);
+// 2
+const allStart = [];
+levels.forEach((level, y) =>
+  level.forEach((char, x) => {
+    if (char === "S" || char === "a") {
+      allStart.push({ x, y, step: 0 });
+    }
+  })
+);
+
+const min = allStart
+  .map((currentPosition, index) => bfs(currentPosition, endPosition, true))
+  .filter((a) => a)
+  .sort((a, b) => a - b)?.[0];
+
+console.log({ min });
